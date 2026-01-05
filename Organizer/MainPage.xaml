@@ -1,0 +1,255 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage x:Class="Organizer.MainPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:Organizer.Models"
+             xmlns:syncfusion="clr-namespace:Syncfusion.Maui.Scheduler;assembly=Syncfusion.Maui.Scheduler"
+             xmlns:vm="clr-namespace:Organizer.ViewModels"
+             xmlns:converters="clr-namespace:Organizer.Converters"
+             xmlns:inputs="clr-namespace:Syncfusion.Maui.Inputs;assembly=Syncfusion.Maui.Inputs"
+             x:DataType="vm:MainViewModel"
+             Title="Organizer"
+             BackgroundColor="{DynamicResource SecondaryColor}">
+    <ContentPage.Resources>
+        <converters:HexToBrushConverter x:Key="HexToBrush" />
+        <Style TargetType="Label" x:Key="SidebarLabel">
+            <Setter Property="TextColor" Value="#B0B0B0"/>
+            <Setter Property="Margin" Value="0,8,0,2"/>
+        </Style>
+        <Style TargetType="Entry" x:Key="SidebarEntry">
+            <Setter Property="BackgroundColor" Value="#2D2D44"/>
+            <Setter Property="TextColor" Value="White"/>
+            <Setter Property="PlaceholderColor" Value="#666"/>
+        </Style>
+        <Style TargetType="Editor" x:Key="SidebarEditor">
+            <Setter Property="BackgroundColor" Value="#2D2D44"/>
+            <Setter Property="TextColor" Value="White"/>
+            <Setter Property="PlaceholderColor" Value="#666"/>
+            <Setter Property="HeightRequest" Value="100"/>
+        </Style>
+        <Style TargetType="Picker" x:Key="SidebarPicker">
+            <Setter Property="BackgroundColor" Value="#2D2D44"/>
+            <Setter Property="TextColor" Value="White"/>
+            <Setter Property="TitleColor" Value="#666"/>
+        </Style>
+        <Style TargetType="DatePicker" x:Key="SidebarDatePicker">
+            <Setter Property="BackgroundColor" Value="#2D2D44"/>
+            <Setter Property="TextColor" Value="White"/>
+        </Style>
+        <Style TargetType="TimePicker" x:Key="SidebarTimePicker">
+            <Setter Property="BackgroundColor" Value="#2D2D44"/>
+            <Setter Property="TextColor" Value="White"/>
+        </Style>
+        <Style TargetType="Button" x:Key="SidebarButton">
+            <Setter Property="BackgroundColor" Value="#2D2D44"/>
+            <Setter Property="TextColor" Value="White"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="VisualStateManager.VisualStateGroups">
+                <VisualStateGroupList>
+                    <VisualStateGroup Name="CommonStates">
+                        <VisualState Name="Normal">
+                            <VisualState.Setters>
+                                <Setter Property="Scale" Value="1"/>
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState Name="Pressed">
+                            <VisualState.Setters>
+                                <Setter Property="Scale" Value="0.95"/>
+                                <Setter Property="BackgroundColor" Value="#44446A"/>
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </Setter>
+        </Style>
+        <Style TargetType="Button" x:Key="PrimaryButton" BasedOn="{StaticResource SidebarButton}">
+            <Setter Property="BackgroundColor" Value="#4A4A6A"/>
+            <Setter Property="FontAttributes" Value="Bold"/>
+            <Setter Property="VisualStateManager.VisualStateGroups">
+                <VisualStateGroupList>
+                    <VisualStateGroup Name="CommonStates">
+                        <VisualState Name="Normal">
+                            <VisualState.Setters>
+                                <Setter Property="Scale" Value="1"/>
+                            </VisualState.Setters>
+                        </VisualState>
+                        <VisualState Name="Pressed">
+                            <VisualState.Setters>
+                                <Setter Property="Scale" Value="0.95"/>
+                                <Setter Property="BackgroundColor" Value="#666699"/>
+                            </VisualState.Setters>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateGroupList>
+            </Setter>
+        </Style>
+    </ContentPage.Resources>
+    <Grid ColumnDefinitions="275, *" BackgroundColor="#F4F5F7">
+        <Border BackgroundColor="#1E1E2D" Padding="12" StrokeThickness="0" Margin="5" StrokeShape="RoundRectangle 10">
+            <ScrollView>
+                <VerticalStackLayout Spacing="10">
+                    <VerticalStackLayout Spacing="10" IsVisible="{Binding IsMenuVisible}">
+                        <Label Text="Меню" TextColor="White" FontAttributes="Bold" FontSize="18" HorizontalOptions="Center" />
+                        <Button Text="Додати завдання" Style="{StaticResource SidebarButton}" Command="{Binding ShowAddFormCommand}" />
+                        <Button Text="Категорії" Style="{StaticResource SidebarButton}" Command="{Binding ShowCategoryManagerCommand}"/>
+                        <Button Text="{Binding SortButtonText}" Style="{StaticResource SidebarButton}" Command="{Binding SortByCategoryCommand}"/>
+                        <Label Text="Активні події:" TextColor="#B0B0B0" FontAttributes="Bold" Margin="0,15,0,0" />
+                        <CollectionView ItemsSource="{Binding Events}" HeightRequest="200">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="syncfusion:SchedulerAppointment">
+                                    <Border BackgroundColor="#2E2E42" Padding="8" Margin="0,2" StrokeShape="RoundRectangle 8" Stroke="{Binding Background}" StrokeThickness="{OnPlatform WinUI=3, Android=3, iOS=3, MacCatalyst=3}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Path=BindingContext.ShowTaskDetailsCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
+                                        <VerticalStackLayout>
+                                            <Label Text="{Binding Subject}" TextColor="White" FontAttributes="Bold" />
+                                            <Label TextColor="#BBBBBB">
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span Text="{Binding StartTime, StringFormat='{0:HH:mm}'}" />
+                                                        <Span Text=" - " />
+                                                        <Span Text="{Binding EndTime, StringFormat='{0:HH:mm}'}" />
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                        <Label Text="Завершені події:" TextColor="#B0B0B0" FontAttributes="Bold" Margin="0,10,0,0" />
+                        <CollectionView ItemsSource="{Binding CompletedEvents}" HeightRequest="200">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="syncfusion:SchedulerAppointment">
+                                    <Border BackgroundColor="#2E2E42" Padding="8" Margin="0,2" StrokeShape="RoundRectangle 8" Opacity="0.7">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Path=BindingContext.ShowTaskDetailsCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
+                                        <VerticalStackLayout>
+                                            <Label Text="{Binding Subject}" TextColor="White" FontAttributes="Bold" TextDecorations="Strikethrough" />
+                                            <Label TextColor="#888888">
+                                                <Label.FormattedText>
+                                                    <FormattedString>
+                                                        <Span Text="{Binding StartTime, StringFormat='{0:HH:mm}'}" />
+                                                        <Span Text=" - " />
+                                                        <Span Text="{Binding EndTime, StringFormat='{0:HH:mm}'}" />
+                                                    </FormattedString>
+                                                </Label.FormattedText>
+                                            </Label>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="5" IsVisible="{Binding IsAddEditVisible}">
+                        <Label Text="{Binding FormTitle}" TextColor="White" FontAttributes="Bold" FontSize="18" HorizontalOptions="Center" />
+                        <Label Text="Назва завдання" Style="{StaticResource SidebarLabel}" />
+                        <Entry Text="{Binding CurrentTaskName}" Style="{StaticResource SidebarEntry}" />
+                        <Label Text="Опис" Style="{StaticResource SidebarLabel}" />
+                        <Editor Text="{Binding CurrentTaskDescription}" Style="{StaticResource SidebarEditor}" />
+                        <Label Text="Категорія" Style="{StaticResource SidebarLabel}" />
+                        <Picker ItemsSource="{Binding CategoriesForPicker}" SelectedItem="{Binding SelectedCategory}" ItemDisplayBinding="{Binding Name}" Title="Обрати категорію" Style="{StaticResource SidebarPicker}"/>
+                        <Label Text="Дата Початку" Style="{StaticResource SidebarLabel}" />
+                        <Label Text="Дата Початку" Style="{StaticResource SidebarLabel}" />
+                        <DatePicker Date="{Binding CurrentTaskStartDate}" Style="{StaticResource SidebarDatePicker}" />
+                        <Label Text="Час Початку" Style="{StaticResource SidebarLabel}" />
+                        <TimePicker Time="{Binding CurrentTaskStartTime}" Style="{StaticResource SidebarTimePicker}" Format="HH:mm" />
+                        <Label Text="Дата Завершення" Style="{StaticResource SidebarLabel}" />
+                        <DatePicker Date="{Binding CurrentTaskEndDate}" Style="{StaticResource SidebarDatePicker}" />
+                        <Label Text="Час Завершення" Style="{StaticResource SidebarLabel}" />
+                        <TimePicker Time="{Binding CurrentTaskEndTime}" Style="{StaticResource SidebarTimePicker}" Format="HH:mm" />
+                        <Label Text="Нагадати за" Style="{StaticResource SidebarLabel}" />
+                        <Grid ColumnDefinitions="*,150" ColumnSpacing="10">
+                            <Entry Grid.Column="0" Text="{Binding CurrentTaskReminderValue}" Style="{StaticResource SidebarEntry}" Keyboard="Numeric" />
+                            <Picker Grid.Column="1" ItemsSource="{Binding ReminderUnits}" SelectedItem="{Binding SelectedReminderUnit}" Style="{StaticResource SidebarPicker}"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,15,0,0">
+                            <Button Grid.Column="0" Text="Зберегти" Command="{Binding SaveTaskCommand}" Style="{StaticResource PrimaryButton}" />
+                            <Button Grid.Column="1" Text="Скасувати" Command="{Binding ShowMenuCommand}" Style="{StaticResource SidebarButton}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="10" IsVisible="{Binding IsCategoryVisible}">
+                        <Label Text="Категорії" Style="{StaticResource SidebarLabel}" FontAttributes="Bold" FontSize="18" HorizontalOptions="Center" TextColor="White"/>
+                        <Label Text="Додати нову" Style="{StaticResource SidebarLabel}" Margin="0"/>
+                        <Entry Text="{Binding NewCategoryInput, Mode=TwoWay}" Style="{StaticResource SidebarEntry}" Placeholder="Назва категорії" />
+                        <Label Text="Колір категорії" Style="{StaticResource SidebarLabel}" Margin="0,5,0,0"/>
+                        <inputs:SfColorPicker SelectedColor="{Binding NewCategoryColor, Mode=TwoWay}" />
+                        <Grid ColumnDefinitions="*,Auto" Margin="0,5,0,0">
+                            <Entry Grid.Column="0" Text="{Binding NewCategoryColorHex, Mode=TwoWay}" Style="{StaticResource SidebarEntry}" Placeholder="#FF0000" />
+                            <Border Grid.Column="1" Background="{Binding NewCategoryColorHex, Converter={StaticResource HexToBrush}}" Stroke="White" StrokeThickness="1" HeightRequest="30" WidthRequest="30" Margin="5,0,0,0" VerticalOptions="Center"/>
+                        </Grid>
+                        <Button Text="Додати" Command="{Binding AddNewCategoryCommand}" Style="{StaticResource PrimaryButton}" />
+                        <Label Text="Існуючі категорії" Style="{StaticResource SidebarLabel}" Margin="0,15,0,0" />
+                        <CollectionView ItemsSource="{Binding UserCategories}" HeightRequest="250">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="local:CategoryItem">
+                                    <Border BackgroundColor="#2E2E42" Padding="8" Margin="0,2" StrokeShape="RoundRectangle 8">
+                                        <Grid ColumnDefinitions="Auto, *, Auto, Auto" ColumnSpacing="8">
+                                            <Border Grid.Column="0" Background="{Binding ColorHex, Converter={StaticResource HexToBrush}}" Stroke="#555" StrokeThickness="1" HeightRequest="20" WidthRequest="20" VerticalOptions="Center" StrokeShape="Rectangle"/>
+                                            <Label Grid.Column="1" Text="{Binding Name}" TextColor="White" VerticalOptions="Center"/>
+                                            <Button Grid.Column="2" Text="✏️" FontSize="16" Style="{StaticResource SidebarButton}" BackgroundColor="Transparent" Padding="0" HeightRequest="30" WidthRequest="30" Command="{Binding Path=BindingContext.ShowEditCategoryCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}"/>
+                                            <Button Grid.Column="3" Text="✖" FontSize="12" TextColor="#FF5555" Style="{StaticResource SidebarButton}" BackgroundColor="Transparent" Padding="0" HeightRequest="30" WidthRequest="30" Command="{Binding Path=BindingContext.DeleteCategoryCommand, Source={RelativeSource AncestorType={x:Type ContentPage}}}" CommandParameter="{Binding .}"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                        <Button Text="Назад" Command="{Binding ShowMenuCommand}" Style="{StaticResource SidebarButton}" Margin="0,15,0,0"/>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="10" IsVisible="{Binding IsEditCategoryVisible}">
+                        <Label Text="Редагувати категорію" Style="{StaticResource SidebarLabel}" FontAttributes="Bold" FontSize="18" HorizontalOptions="Center" TextColor="White"/>
+                        <Label Text="Назва категорії" Style="{StaticResource SidebarLabel}" Margin="0,10,0,0"/>
+                        <Entry Text="{Binding EditCategoryName, Mode=TwoWay}" Style="{StaticResource SidebarEntry}" />
+                        <Label Text="Колір категорії" Style="{StaticResource SidebarLabel}" Margin="0,10,0,0"/>
+                        <inputs:SfColorPicker SelectedColor="{Binding EditCategoryColor, Mode=TwoWay}" />
+                        <Grid ColumnDefinitions="*,Auto" Margin="0,5,0,0">
+                            <Entry Grid.Column="0" Text="{Binding EditCategoryColorHex, Mode=TwoWay}" Style="{StaticResource SidebarEntry}" Placeholder="#FF0000" />
+                            <Border Grid.Column="1" Background="{Binding EditCategoryColorHex, Converter={StaticResource HexToBrush}}" Stroke="White" StrokeThickness="1" HeightRequest="30" WidthRequest="30" Margin="5,0,0,0" VerticalOptions="Center"/>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,20,0,0">
+                            <Button Grid.Column="0" Text="Зберегти" Command="{Binding SaveEditCategoryCommand}" Style="{StaticResource PrimaryButton}" />
+                            <Button Grid.Column="1" Text="Скасувати" Command="{Binding ShowCategoryManagerCommand}" Style="{StaticResource SidebarButton}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="10" IsVisible="{Binding IsDetailsVisible}">
+                        <Label Text="Деталі завдання" TextColor="White" FontAttributes="Bold" FontSize="18" HorizontalOptions="Center" />
+                        <Border Background="{Binding SelectedTaskCategoryBrush}" HeightRequest="5" HorizontalOptions="Fill" StrokeThickness="0" Margin="0,0,0,5" />
+                        <Label Text="{Binding SelectedTaskStatusText}" TextColor="{Binding SelectedTaskStatusColor}" FontSize="14" FontAttributes="Bold" HorizontalOptions="Center" />
+                        <Label Text="{Binding SelectedTaskName}" TextColor="White" FontSize="16" FontAttributes="Bold"/>
+                        <Label Text="{Binding SelectedTaskTimeRange}" Style="{StaticResource SidebarLabel}" FontSize="14"/>
+                        <Label Text="{Binding SelectedTaskReminderInfo}" Style="{StaticResource SidebarLabel}" TextColor="#FFD740" FontSize="12" Margin="0,-5,0,5" />
+                        <Label Text="Категорія" Style="{StaticResource SidebarLabel}" Margin="0,10,0,0"/>
+                        <Label Text="{Binding SelectedTaskCategory}" TextColor="White" FontSize="14"/>
+                        <Label Text="Опис" Style="{StaticResource SidebarLabel}" Margin="0,10,0,0"/>
+                        <ScrollView HeightRequest="150">
+                            <Label Text="{Binding SelectedTaskDescription}" TextColor="White" FontSize="14" LineBreakMode="WordWrap"/>
+                        </ScrollView>
+                        <Button Text="{Binding ToggleButtonText}" Command="{Binding ToggleTaskCompletionCommand}" Style="{StaticResource PrimaryButton}" BackgroundColor="#3a6b3a" Margin="0,10,0,0"/>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Margin="0,10,0,0">
+                            <Button Grid.Column="0" Text="Редагувати" Command="{Binding GoToEditFromDetailsCommand}" Style="{StaticResource PrimaryButton}" />
+                            <Button Grid.Column="1" Text="Видалити" Command="{Binding DeleteTaskFromDetailsCommand}" Style="{StaticResource SidebarButton}" BackgroundColor="#6B2F2F"/>
+                        </Grid>
+                        <Button Text="Назад до меню" Command="{Binding ShowMenuCommand}" Style="{StaticResource SidebarButton}" Margin="0,10,0,0"/>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </ScrollView>
+        </Border>
+        <Border Grid.Column="1" BackgroundColor="White" Padding="20" Margin="5" StrokeShape="RoundRectangle 10">
+            <Grid RowDefinitions="Auto, *">
+                <Label Grid.Row="0" Text="Календар подій" FontSize="20" FontAttributes="Bold" TextColor="#333" />
+                <syncfusion:SfScheduler Grid.Row="1" x:Name="Scheduler" View="Week" AppointmentsSource="{Binding Events}" AllowViewNavigation="True" AllowedViews="Day,Week,Month,Agenda" Margin="0,10,0,0" Tapped="Scheduler_Tapped">
+                    <syncfusion:SfScheduler.AppointmentMapping>
+                        <syncfusion:SchedulerAppointmentMapping Subject="Subject" StartTime="StartTime" EndTime="EndTime" Notes="Notes" Background="Background" IsAllDay="IsAllDay"/>
+                    </syncfusion:SfScheduler.AppointmentMapping>
+                    <syncfusion:SfScheduler.DaysView>
+                        <syncfusion:SchedulerDaysView TimeFormat="HH:mm" />
+                    </syncfusion:SfScheduler.DaysView>
+                    <syncfusion:SfScheduler.AgendaView>
+                        <syncfusion:SchedulerAgendaView AppointmentTimeFormat="HH:mm" />
+                    </syncfusion:SfScheduler.AgendaView>
+                </syncfusion:SfScheduler>
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>
